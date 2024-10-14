@@ -1,4 +1,4 @@
-import datatime
+import datetime
 import hashlib
 import json
 from flask import Flask,jsonify
@@ -11,7 +11,7 @@ class BlockChain:
 	def creat_block(self,proof,prev_hash):
 		block={
 			'index':len(self.chain)+1,
-			'time_stamp':str(datatime.datatime.now()),
+			'time_stamp':str(datetime.datetime.now()),
 			'proof':proof,
 			'prev_hash':prev_hash
 			}
@@ -55,6 +55,27 @@ class BlockChain:
 
 
 
+#creating a backend
+app=Flask(__name__)
+block_chain=BlockChain()
 
+@app.route("/mine_block",methods=['GET'])
+def mine_block():
+	prev_block=block_chain.get_last_block()
+	proof=block_chain.proof_of_work(prev_block['proof'])
+	prev_hash=block_chain.hash(prev_block)
+	current_block=block_chain.creat_block(proof,prev_hash)
+	respons={'message':"congratulations, you just minted a block",
+			'index':current_block['index'],
+			'time_stamp':current_block['time_stamp'],
+			'proof':current_block['proof'],
+			'prev_hash':current_block['prev_hash']
+	}
+	return jsonify(respons),200
+@app.route('/get_chain',methods=['GET'])
+def display_blockchain():
+	respons={'length':len(block_chain.chain),
+	'chain':block_chain.chain}
+	return jsonify(respons),200
 
-
+app.run(host='0.0.0.0',port='5000')
