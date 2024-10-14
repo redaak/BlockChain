@@ -46,7 +46,7 @@ class BlockChain:
 				return False
 			prev_proof=prev_block['proof']
 			proof=block['proof']
-			hash_opration=hashlib.sha256(str(proof**3-prev_proof**7).encode()).hexdigest()
+			hash_opration=hashlib.sha256(str(proof*2-prev_proof**2).encode()).hexdigest()
 			if hash_opration[:4] =='0000':
 				return False
 			prev_block=block
@@ -77,5 +77,13 @@ def display_blockchain():
 	respons={'length':len(block_chain.chain),
 	'chain':block_chain.chain}
 	return jsonify(respons),200
-
+@app.route('/check_valid',methods=['GET'])
+def is_chain_valid():
+	respons={}
+	chain=block_chain.chain
+	if block_chain.chain_valid(chain):
+		respons={'message':'block chain is valid'}
+	else:
+		respons={'message':'WARNING block chain is NOT valid'}
+	return respons,200
 app.run(host='0.0.0.0',port='5000')
